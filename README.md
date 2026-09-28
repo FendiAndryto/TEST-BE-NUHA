@@ -8,24 +8,8 @@
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791.svg)](https://www.postgresql.org/)
 [![JWT](https://img.shields.io/badge/Auth-JWT-black.svg)](https://jwt.io/)
 
----
 
-## Studi Kasus & Pemenuhan Kriteria Soal
-
-| No | Kriteria Soal | Status | Solusi Implementasi |
-|:--:|---|:---:|---|
-| **1** | Karyawan dapat login dengan menggunakan username dan password | ✅ **LENGKAP** | Endpoint `POST /api/auth/login` dengan enkripsi password `bcrypt` & validasi skema `Zod`. |
-| **2** | Untuk karyawan dengan jabatan ganda, sistem memberi pilihan role apa yang dipilih | ✅ **LENGKAP** | Deteksi otomatis `roles.length > 1`. Mengembalikan `requiresRoleSelection: true`, daftar pilihan role, dan `preAuthToken` sementara (15 menit). Diikuti pemanggilan endpoint `POST /api/auth/select-role` untuk memilih role aktif & menerbitkan JWT resmi. |
-| **3** | Karyawan yang berhasil login diberikan sederet menu sesuai dengan role yang dipilih | ✅ **LENGKAP** | Endpoint `GET /api/menus/my-menu` membaca `roleId` dari payload JWT dan mengembalikan struktur pohon berjenjang (*nested tree*) sesuai izin role. |
-| **4** | Management menu (multiple level tanpa batas) & Management access role | ✅ **LENGKAP** | - **Menu Berjenjang:** Menggunakan relasi *self-referencing* `parent_id` pada tabel `menus` yang mendukung kedalaman tanpa batas (*unlimited levels*).<br>- **Role Access:** Relasi *many-to-many* `role_menus` dengan endpoint `GET/POST /api/roles/:id/menus` untuk sinkronisasi hak akses per role. |
-| **5** | Menggunakan JWT untuk token login | ✅ **LENGKAP** | JWT token dengan claims `userId`, `username`, `roleId`, dan `roleName`. |
-| **6** | Membuat Wireframe/Mockup (Nilai Lebih) | 🌟 **BONUS** | Tersedia **Web UI Mockup interaktif responsif** di `http://localhost:3000` dengan navigasi sidebar pohon berjenjang, modal pemilihan role jabatan ganda, dan live API inspector. |
-
----
-
-## 👥 Data Akun Uji Coba Interview
-
-Database telah dilengkapi dengan data seeder otomatis untuk simulasi interview:
+## Data Akun
 
 | Username | Password | Tipe Akun | Hak Akses Role | Keterangan Uji Coba |
 |---|---|---|---|---|
@@ -35,9 +19,7 @@ Database telah dilengkapi dengan data seeder otomatis untuk simulasi interview:
 
 ---
 
-## 🌳 Struktur Menu Uji Coba (Catatan Soal)
-
-Sistem database seeder secara presisi mengimplementasikan seluruh struktur menu yang diminta pada **Catatan Soal**:
+## Struktur Menu S
 
 ```text
 Menu 1
@@ -62,7 +44,7 @@ Menu 3
 ```
 
 
-## ⚡ Panduan Instalasi & Menjalankan Aplikasi
+## Instalasi 
 
 ### 1. Clone & Install Dependencies
 ```bash
@@ -90,20 +72,15 @@ PREAUTH_JWT_SECRET="nuha_preauth_secret_key_2026_abc"
 > ```
 
 ### 3. Generate Schema & Seeding Database
-Jalankan perintah berikut untuk migrasi tabel dan mengisi data pengujian interview:
+
 ```bash
 npm run setup:db
 ```
-*(Perintah ini mengeksekusi `prisma db push` dan `prisma/seed.ts`)*
 
 ### 4. Jalankan Server
 ```bash
 npm run dev
 ```
-
-Server akan aktif pada:
-- **🎨 Interactive Web UI Mockup:** [http://localhost:3000](http://localhost:3000)
-- **📄 Interactive Swagger API Docs:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
 ---
 
@@ -116,15 +93,3 @@ Server akan aktif pada:
 
 ---
 
-## 🚀 Panduan Push ke GitHub (Soal #4)
-
-1. Buat repository baru di GitHub (misal: `test-be-nuha`).
-2. Jalankan perintah git berikut di terminal:
-```bash
-git init
-git add .
-git commit -m "feat: complete backend assessment PT Data Integrasi Inovasi (NUHA)"
-git branch -M main
-git remote add origin https://github.com/USERNAME_ANDA/test-be-nuha.git
-git push -u origin main
-```
