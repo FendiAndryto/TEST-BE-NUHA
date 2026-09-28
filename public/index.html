@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PT Data Integrasi Inovasi (NUHA) - Access & Menu Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">NUHA ACCESS SYSTEM</div>
+        <div class="brand-sub">PT Data Integrasi Inovasi</div>
+      </div>
+    </div>
+
+    <div class="header-actions" id="headerActions" style="display: none;">
+      <a href="/api-docs" target="_blank" class="btn btn-sm btn-outline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        Swagger API Docs
+      </a>
+
+      <!-- Role Switcher (Kriteria 2) -->
+      <div class="role-switcher-dropdown" id="roleSwitcherContainer" style="display: none;">
+        <button class="btn btn-sm btn-secondary dropdown-trigger" id="btnRoleSwitcher" onclick="toggleRoleDropdown()">
+          <span class="pulse-indicator"></span>
+          <span id="headerRoleBadge">Role</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="dropdown-menu" id="roleDropdownMenu">
+          <div class="dropdown-header">Beralih Jabatan (Dual Role)</div>
+          <div id="roleDropdownItems"></div>
+        </div>
+      </div>
+
+      <div class="user-pill">
+        <div class="user-avatar" id="headerAvatar">U</div>
+        <div class="user-meta">
+          <span class="user-name" id="headerUserName">Nama User</span>
+          <span class="user-role-label" id="headerUserRole">Role Name</span>
+        </div>
+      </div>
+
+      <button class="btn btn-sm btn-danger-outline" onclick="logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Notification Toast -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- AUTH VIEW (LOGIN SCREEN) -->
+  <main id="authView" class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Sistem Manajemen Akses Pegawai</h2>
+        <p class="text-muted">Akses menu dan modul kerja sesuai hak akses jabatan Anda.</p>
+      </div>
+
+      <!-- Quick Demo Login Presets -->
+      <div class="demo-login-box">
+        <div class="demo-box-title">Quick Login</div>
+        <div class="demo-buttons-grid">
+          <button type="button" class="btn-demo-preset" onclick="quickLogin('budi.santoso', 'password123')">
+            <div class="demo-role-tag badge-dual">JABATAN GANDA</div>
+            <strong>Budi Santoso</strong>
+            <small>budi.santoso</small>
+            <small>password123</small>
+            <small>Manager Ops &amp; Supervisor</small>
+          </button>
+          <button type="button" class="btn-demo-preset" onclick="quickLogin('siti.aminah', 'password123')">
+            <div class="demo-role-tag badge-single">SINGLE ROLE</div>
+            <strong>Siti Aminah</strong>
+            <small>siti.aminah</small>
+            <small>password123</small>
+            <small>Staff Administrasi</small>
+          </button>
+          <button type="button" class="btn-demo-preset" onclick="quickLogin('admin', 'admin123')">
+            <div class="demo-role-tag badge-admin">FULL ACCESS</div>
+            <strong>Super Admin</strong>
+            <small>admin</small>
+            <small>admin123</small>
+            <small>Administrator Sistem</small>
+          </button>
+        </div>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" class="form-control" placeholder="Contoh: budi.santoso" required
+            autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Masukkan password" required
+            autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="btnLoginSubmit" class="btn btn-primary btn-block">
+          <span class="btn-text">Masuk ke Sistem</span>
+        </button>
+      </form>
+
+      <div class="auth-footer-info">
+        <small>Node.js + Express + Prisma ORM + PostgreSQL + JWT</small>
+      </div>
+    </div>
+  </main>
+
+  <!-- ROLE SELECTION MODAL (KRITERIA #2: JABATAN GANDA) -->
+  <div id="roleModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="icon-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div>
+          <h3>Pilih Jabatan Kerja (Dual Role)</h3>
+          <p class="text-muted" id="roleModalSubtext">Akun Anda terdaftar memiliki lebih dari satu jabatan.</p>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <p class="role-select-instruction">
+          Silakan pilih peran kerja yang ingin Anda gunakan untuk sesi kali ini. Menu kerja yang ditampilkan akan
+          disesuaikan secara otomatis:
+        </p>
+        <div id="roleOptionsList" class="role-options-list"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="cancelRoleSelection()">Batal</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmRole" disabled onclick="submitRoleSelection()">
+          Lanjutkan dengan Role Ini &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboardView" class="dashboard-layout" style="display: none;">
+    <!-- SIDEBAR WITH DYNAMIC TREE MENU (KRITERIA #3) -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="active-role-card">
+          <div class="role-badge" id="sidebarRoleBadge">ACTIVE ROLE</div>
+          <div class="role-name-display" id="sidebarRoleName">Role Name</div>
+          <div class="role-desc-display" id="sidebarRoleDesc">Hak akses menu</div>
+        </div>
+      </div>
+
+      <div class="sidebar-menu-header">
+        <span>MENU HAK AKSES ANDA</span>
+        <button class="btn-icon" title="Refresh Menu" onclick="loadMyMenu()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Recursive Tree Menu Root Container -->
+      <nav id="sidebarMenuTree" class="tree-menu-container"></nav>
+
+      <div class="sidebar-footer">
+        <div class="api-status-indicator">
+          <span class="status-dot"></span> Backend API Connected
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="main-content">
+      <!-- Navigation Tabs -->
+      <div class="content-tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-preview')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          Pratinjau Menu Aktif
+        </button>
+        <button class="tab-btn" id="tabBtnRoleMgmt" onclick="switchTab('tab-role-mgmt')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          Management Access Role
+        </button>
+        <button class="tab-btn" id="tabBtnMenuMgmt" onclick="switchTab('tab-menu-mgmt')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          Management Menu Multiple Level
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-api-inspector')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          Live API Inspector
+        </button>
+      </div>
+
+      <!-- TAB 1: PREVIEW MENU AKTIF -->
+      <section id="tab-preview" class="tab-pane active">
+        <div class="page-header">
+          <div>
+            <div class="breadcrumb" id="contentBreadcrumbs">
+              <span>Home</span> &gt; <span class="active">Menu 1</span>
+            </div>
+            <h1 id="selectedMenuTitle">Menu 1</h1>
+            <p class="text-muted" id="selectedMenuDesc">Silakan klik salah satu menu di sidebar sebelah kiri untuk
+              melihat navigasi hirarki berjenjang tanpa batas.</p>
+          </div>
+          <div class="depth-badge" id="menuDepthBadge">Level 1 Root</div>
+        </div>
+
+        <div class="dashboard-cards-grid">
+          <div class="card stat-card">
+            <div class="stat-label">Pengguna Aktif</div>
+            <div class="stat-value" id="cardUserName">-</div>
+            <div class="stat-meta" id="cardUserEmail">-</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label">Jabatan Aktif</div>
+            <div class="stat-value" id="cardRoleName">-</div>
+            <div class="stat-meta" id="cardRoleCode">-</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label">Total Menu Hak Akses</div>
+            <div class="stat-value" id="cardTotalMenus">0</div>
+            <div class="stat-meta">Tersaring sesuai role</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: ROLE ACCESS MANAGEMENT -->
+      <section id="tab-role-mgmt" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1>Management Access Role</h1>
+            <p class="text-muted">Atur hak akses menu yang dapat dilihat oleh masing-masing jabatan/role dalam
+              perusahaan.</p>
+          </div>
+          <button class="btn btn-primary" onclick="saveRolePermissions()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Simpan Perubahan Akses Role
+          </button>
+        </div>
+
+        <div class="role-mgmt-grid">
+          <!-- Role Selector Column -->
+          <div class="card role-selector-card">
+            <h3>Pilih Role / Jabatan:</h3>
+            <div id="roleSelectorList" class="role-selector-list"></div>
+          </div>
+
+          <!-- Menu Permission Tree Column -->
+          <div class="card permission-tree-card">
+            <div class="permission-tree-header">
+              <div>
+                <h3 id="targetRoleNameHeader">Hak Akses Menu untuk: ...</h3>
+                <small class="text-muted">Centang menu yang diizinkan untuk diakses oleh role ini.</small>
+              </div>
+              <div class="tree-quick-actions">
+                <button type="button" class="btn btn-xs btn-outline" onclick="checkAllPermissions(true)">Centang
+                  Semua</button>
+                <button type="button" class="btn btn-xs btn-outline" onclick="checkAllPermissions(false)">Hapus
+                  Semua</button>
+              </div>
+            </div>
+
+            <div id="permissionTreeContainer" class="permission-tree-container">
+              <div class="loading-spinner">Memuat data permission...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: MENU MANAGEMENT -->
+      <section id="tab-menu-mgmt" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1>Management Menu</h1>
+            <p class="text-muted">Kelola struktur master menu perusahaan, buat submenu dengan kedalaman tanpa batas.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddMenuModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Tambah Menu Baru
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Nama Menu</th>
+                  <th>Kode Menu</th>
+                  <th>Path URL</th>
+                  <th>Parent Menu</th>
+                  <th>Urutan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="masterMenuTableBody">
+                <tr>
+                  <td colspan="7" class="text-center py-4">Memuat data menu...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: LIVE API INSPECTOR -->
+      <section id="tab-api-inspector" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1>Live REST API Inspector</h1>
+            <p class="text-muted">Pantau request dan response JSON secara real-time yang sedang dipanggil oleh frontend.
+            </p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="clearApiLogs()">Bersihkan Log</button>
+        </div>
+
+        <div class="card json-viewer-card">
+          <div class="json-viewer-header">
+            <span class="badge-pill" id="apiMethodBadge">GET</span>
+            <span class="api-endpoint-url" id="apiEndpointUrl">/api/menus/my-menu</span>
+          </div>
+          <pre class="json-code-box" id="apiJsonOutput">// Response JSON akan muncul di sini saat API dipanggil...</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ADD / EDIT MENU MODAL -->
+  <div id="menuModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="menuModalTitle">Tambah Menu Baru</h3>
+        <button class="btn-close" onclick="closeMenuModal()">&times;</button>
+      </div>
+
+      <form id="menuForm" onsubmit="handleSaveMenu(event)">
+        <input type="hidden" id="menuFormId">
+
+        <div class="form-group">
+          <label for="menuName">Nama Menu *</label>
+          <input type="text" id="menuName" class="form-control" placeholder="Contoh: Menu 1.4" required>
+        </div>
+
+        <div class="form-group">
+          <label for="menuCode">Kode Menu Unik *</label>
+          <input type="text" id="menuCode" class="form-control" placeholder="Contoh: M1_4" required>
+        </div>
+
+        <div class="form-group">
+          <label for="menuParentId">Parent Menu (Pilih untuk Submenu Multiple Level)</label>
+          <select id="menuParentId" class="form-control">
+            <option value="">-- Menu Utama / Root (Level 1) --</option>
+          </select>
+          <small class="text-muted">Pilih parent untuk membuat submenu bersarang tanpa batas kedalaman.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="menuPath">Path URL</label>
+          <input type="text" id="menuPath" class="form-control" placeholder="Contoh: /menu-1/4">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="menuOrder">Urutan Tampil (Order Index)</label>
+            <input type="number" id="menuOrder" class="form-control" value="1" min="0">
+          </div>
+          <div class="form-group col-6">
+            <label for="menuIcon">Icon Identifier</label>
+            <input type="text" id="menuIcon" class="form-control" value="file-text"
+              placeholder="folder, file-text, etc.">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeMenuModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Menu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+
+</html>
