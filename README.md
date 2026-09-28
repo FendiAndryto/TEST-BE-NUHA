@@ -48,7 +48,7 @@ Menu 3
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone <URL_REPOSITORY_ANDA>
+git clone https://github.com/FendiAndryto/TEST-BE-NUHA.git
 cd TEST-BE-NUHA
 npm install
 ```
